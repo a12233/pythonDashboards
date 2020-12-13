@@ -11,6 +11,8 @@ import pandas as pd
 from pandas import DataFrame, Series
 from pandas.tseries.offsets import BDay
 from pandas.tseries import offsets
+from botocore.exceptions import ClientError
+import logging
 
 ticker = 'AAPL'
 conn = sqlite3.connect('prices.db')
@@ -30,5 +32,3 @@ try:
     response = s3_client.upload_file("prices.db", S3_BUCKET, "prices.db")
 except ClientError as e:
     logging.error(e)
-    return False
-return True
