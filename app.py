@@ -13,6 +13,9 @@ import pandas as pd
 from pandas import DataFrame, Series
 from pandas.tseries.offsets import BDay
 from pandas.tseries import offsets
+import boto3
+from botocore.exceptions import ClientError
+import logging
 
 millnames = ['',' Thousand',' Million',' Billion',' Trillion']
 
@@ -46,7 +49,7 @@ def getPriceChange(ticker):
     flag = c.fetchall() 
     if flag[0][0] == 0:
         data = yf.Ticker(ticker).history(period="max")
-        data.to_sql(ticker, conn, schema=None, if_exists='replace',lindex=True, index_label=None, chunksize=None, dtype=None, method=None)
+        data.to_sql(ticker, conn, schema=None, if_exists='replace', index=True, index_label=None, chunksize=None, dtype=None, method=None)
 
     df = pd.read_sql(f"""SELECT * FROM {ticker}""", conn)
     df['Date'] = pd.to_datetime(df['Date'])
@@ -85,7 +88,7 @@ def getPriceChange(ticker):
         # print(temp_df)
         # res_df = temp_df_two.div(temp_df)
         # print(df.loc[df['Date'] == timeMap[time]])
-        # print(temp_df_two['Close'] )
+        print(temp_df_two['Close'] )
         res[time] = temp_df_two.iloc[0]['Close'] / temp_df.iloc[0]['Close']
 
     ticker + '%Change from Date'
@@ -97,9 +100,30 @@ def getPriceChange(ticker):
     conn.close()
     return 
 
+def upload():
+    ticker = 'AAPL'
+    conn = sqlite3.connect('prices.db')
+    c = conn.cursor()
+    data = yf.Ticker(ticker).history(period="max")
+    data.to_sql(ticker, conn, schema=None, if_exists='replace', index=True, index_label=None, chunksize=None, dtype=None, method=None)
+
+
+    S3_BUCKET = os.environ.get('S3_BUCKET')
+
+    # Upload the file
+    s3_client = boto3.client('s3',
+        aws_access_key_id=os.environ.get('AWS_ID'),
+        aws_secret_access_key=os.environ.get('AWS_KEY'))
+
+    try:
+        response = s3_client.upload_file("prices.db", S3_BUCKET, "prices.db")
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
 
 if __name__ == "__main__":
-    sp500List = ['AAPL', 'AMZN', 'GOOGL', 'TSLA', 'MSFT']
+    sp500List = [ 'AMZN', 'GOOGL', 'TSLA', 'MSFT']
     for ticker in sp500List: 
         st.json(testPolygon(ticker))
         getPriceChange(ticker)
