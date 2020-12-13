@@ -46,7 +46,7 @@ def getPriceChange(ticker):
     flag = c.fetchall() 
     if flag[0][0] == 0:
         data = yf.Ticker(ticker).history(period="max")
-        data.to_sql(ticker, conn, schema=None, if_exists='replace', index=True, index_label=None, chunksize=None, dtype=None, method=None)
+        data.to_sql(ticker, conn, schema=None, if_exists='replace',lindex=True, index_label=None, chunksize=None, dtype=None, method=None)
 
     df = pd.read_sql(f"""SELECT * FROM {ticker}""", conn)
     df['Date'] = pd.to_datetime(df['Date'])
