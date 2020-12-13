@@ -42,7 +42,6 @@ def testPolygon(ticker):
         return json.dumps(res) 
 
 def getPriceChange(ticker):
-    cache = {}
     conn = sqlite3.connect('prices.db')
     c = conn.cursor()
     c.execute(f"""SELECT count(*) FROM sqlite_master WHERE type=\'table\' AND name=\'{ticker}\';""")
@@ -72,7 +71,7 @@ def getPriceChange(ticker):
 
     timeList = [dateMinus6mo, dateMinus3, dateMinus5, year_start_date]
     # timeMap = {six_mo_ago: dateMinus6mo, three_yrs_ago : dateMinus3, five_yrs_ago : dateMinus5, test : year_start_date}
-    res = {dateMinus6mo: 0, dateMinus3 : 0, dateMinus5 : 0, year_start_date : 0}
+    res = {}
     # print(df.tail(1))
     # print(df.loc[df['Date'] == year_start_date])
     # print(df.tail(1))
@@ -80,15 +79,16 @@ def getPriceChange(ticker):
         if time.dayofweek == 5:
             bd = pd.tseries.offsets.BusinessDay(offset = timedelta(days = 2)) 
             time += bd 
-        if time.day == 6:
+        if time.dayofweek == 6:
             bd = pd.tseries.offsets.BusinessDay(offset = timedelta(days = 1)) 
             time += bd 
         temp_df = df.loc[df['Date'] == time]
+        # print(temp_df)
         temp_df_two = df.tail(1)
         # print(temp_df)
         # res_df = temp_df_two.div(temp_df)
         # print(df.loc[df['Date'] == timeMap[time]])
-        print(temp_df_two['Close'] )
+        # print(temp_df_two['Close'] )
         res[time] = temp_df_two.iloc[0]['Close'] / temp_df.iloc[0]['Close']
 
     ticker + '%Change from Date'
@@ -127,3 +127,5 @@ if __name__ == "__main__":
     for ticker in sp500List: 
         st.json(testPolygon(ticker))
         getPriceChange(ticker)
+
+    # upload()
