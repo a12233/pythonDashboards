@@ -17,7 +17,7 @@ import boto3
 from botocore.exceptions import ClientError
 import logging
 
-millnames = ['',' Thousand',' Million',' Billion',' Trillion']
+millnames = ['',' Thousand',' M',' B',' T']
 
 def millify(n):
     n = float(n)
@@ -32,14 +32,14 @@ def testPolygon(ticker):
     with RESTClient(key) as client:
 
         response = client.reference_stock_financials(ticker, limit=1, type="Y")
-        attribute = ['ticker','revenuesUSD', 'marketCapitalization', 'grossProfit', 'netCashFlowFromOperations']
+        attribute = ['ticker','revenuesUSD', 'marketCapitalization', 'grossProfit', 'netCashFlowFromOperations', 'EBITDAMargin', 'debtToEquityRatio']
         res = dict.fromkeys(attribute)
         for i in attribute: 
-            if i != 'ticker':
+            if i not in ['ticker', 'EBITDAMargin', 'debtToEquityRatio']:
                 res[i] = millify(response.results[0][i])
             else: 
                 res[i] = response.results[0][i]
-        return json.dumps(res) 
+        return res
 
 def getPriceChange(ticker):
     conn = sqlite3.connect('prices.db')
@@ -69,9 +69,10 @@ def getPriceChange(ticker):
     dateMinus6mo = pd.to_datetime(six_mo, format="%Y-%m-%d")
     year_start_date = pd.to_datetime(test, format="%Y-%m-%d")
 
-    timeList = [dateMinus6mo, dateMinus3, dateMinus5, year_start_date]
+    timeList = [dateMinus6mo, year_start_date, dateMinus3, dateMinus5]
     # timeMap = {six_mo_ago: dateMinus6mo, three_yrs_ago : dateMinus3, five_yrs_ago : dateMinus5, test : year_start_date}
     res = {}
+    outputArray = [ticker]
     # print(df.tail(1))
     # print(df.loc[df['Date'] == year_start_date])
     # print(df.tail(1))
@@ -91,14 +92,15 @@ def getPriceChange(ticker):
         # print(temp_df_two['Close'] )
         res[time] = temp_df_two.iloc[0]['Close'] / temp_df.iloc[0]['Close']
 
-    ticker + '%Change from Date'
-    for i,v in res.items(): 
-        f"{i.to_pydatetime():%Y-%m-%d}" , '{:.2%}'.format(v)
+    # ticker + '%Change from Date'
+    for i,v in res.items():
+        # f"{i.to_pydatetime():%Y-%m-%d}" , '{:.2%}'.format(v)
+        outputArray.append('{:.2%}'.format(v))
 
     # st.write(res)
 
     conn.close()
-    return 
+    return outputArray
 
 def upload():
     ticker = 'AAPL'
@@ -123,9 +125,26 @@ def upload():
     return True
 
 if __name__ == "__main__":
-    sp500List = [ 'AMZN', 'GOOGL', 'TSLA', 'MSFT']
+    sp500List = [ 'AMZN', 'GOOGL', 'TSLA', 'MSFT', 'A', 'BIO', 'BBY']
+    outputColumnsGrowth = ['Ticker', '6 month', 'YTD', '3Y', '5Y']
+    outputColumnsFundamentals = ['Ticker', 'revenuesUSD', 'marketCapitalization', 'grossProfit', 'netCashFlowFromOperations']
+    fundamentalData = []
+    growthData = []
     for ticker in sp500List: 
-        st.json(testPolygon(ticker))
-        getPriceChange(ticker)
+        fundamentalData.append(testPolygon(ticker))
+        growthData.append(getPriceChange(ticker))
+
+    dfGrowth = pd.DataFrame(growthData, columns = outputColumnsGrowth)
+    dfFundamental = pd.DataFrame(fundamentalData)
+    st.dataframe(dfGrowth, width = 2000, height = 500)
+    st.dataframe(dfFundamental, width = 50000, height = 5000)
+
+    # col1, col2 = st.beta_columns(2)
+    # with col1: 
+    #     st.dataframe(dfGrowth, width = 2000, height = 500)
+    # with col2: 
+    #     st.dataframe(dfFundamental, width = 50000, height = 5000)
+
+
 
     # upload()
