@@ -1,0 +1,15 @@
+Growth: 
+* 6month, YTD, 1 year, 3 year, 5 year price change
+
+Fundamentals: 
+* market cap, revenue, EBITDAT, quarterly revenue growth rate, debit/equity ratio, insitituion hold percentage
+
+Relative Strength: 
+* qqq, spy, current week price change%
+* get the stock current week price change %
+* compare
+
+Indivdual stock growth: 
+* (close - ema20)/ema20
+* (ema20-em60)/ema60
+* (ema60-ema120)/ema120
