@@ -124,6 +124,24 @@ def upload():
         return False
     return True
 
+def getNearestBusinessDayInPast(date, days=0, weeks=0, months=0, years=0):
+    date = datetime.now()
+    six_mo_ago = datetime.now() - relativedelta(month=6)
+    three_yrs_ago = datetime.now() - relativedelta(years=3)
+    five_yrs_ago = datetime.now() - relativedelta(years=5)
+    year_start = "2020-01-02"
+    test = datetime.strptime(year_start, '%Y-%m-%d')
+
+    three_years = three_yrs_ago.strftime("%Y-%m-%d")
+    five_years = five_yrs_ago.strftime("%Y-%m-%d")
+    six_mo = six_mo_ago.strftime("%Y-%m-%d")
+
+    dateMinus3 = pd.to_datetime(three_years, format="%Y-%m-%d")
+    dateMinus5 = pd.to_datetime(five_years, format="%Y-%m-%d")
+    dateMinus6mo = pd.to_datetime(six_mo, format="%Y-%m-%d")
+    year_start_date = pd.to_datetime(test, format="%Y-%m-%d")
+    return
+
 if __name__ == "__main__":
     sp500List = [ 'AMZN', 'GOOGL', 'TSLA', 'MSFT', 'A', 'BIO', 'BBY']
     outputColumnsGrowth = ['Ticker', '6 month', 'YTD', '3Y', '5Y']
@@ -140,7 +158,7 @@ if __name__ == "__main__":
     st.dataframe(dfFundamental, width = 50000, height = 5000)
 
     # col1, col2 = st.beta_columns(2)
-    # with col1: 
+    # with col1: gi
     #     st.dataframe(dfGrowth, width = 2000, height = 500)
     # with col2: 
     #     st.dataframe(dfFundamental, width = 50000, height = 5000)
