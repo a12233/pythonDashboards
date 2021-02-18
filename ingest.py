@@ -31,7 +31,7 @@ if __name__ == "__main__":
     S3_BUCKET = os.environ.get('S3_BUCKET')
     s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
     warnings.filterwarnings("ignore")
-    n_threads = 20
+    n_threads = 5
     df = pd.read_csv('./tickers.csv')
     tickerLen = len(df['Symbol'].index)
     ticker = df['Symbol'].iteritems()
