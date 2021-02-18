@@ -27,15 +27,15 @@ def upload(s3_client, S3_BUCKET):
         logging.error(e)
 
 if __name__ == "__main__":
-    # s3_client = boto3.client('s3',
-    #     aws_access_key_id=os.environ.get('AWS_ID'),
-    #     aws_secret_access_key=os.environ.get('AWS_KEY'))
-    # S3_BUCKET = os.environ.get('S3_BUCKET')
-    # s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
+    s3_client = boto3.client('s3',
+        aws_access_key_id=os.environ.get('AWS_ID'),
+        aws_secret_access_key=os.environ.get('AWS_KEY'))
+    S3_BUCKET = os.environ.get('S3_BUCKET')
+    s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
     warnings.filterwarnings("ignore")
     n_threads = 20
     df = pd.read_csv('./tickers.csv')
     ticker = df['Symbol'].iteritems()
     with ThreadPoolExecutor(max_workers=n_threads) as pool:
         pool.map(download, ticker)
-    # upload(s3_client)
+    upload(s3_client, S3_BUCKET)
