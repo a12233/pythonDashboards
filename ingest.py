@@ -9,7 +9,6 @@ from concurrent.futures import ThreadPoolExecutor
 import warnings
 
 def download(v, conn):
-    v = v[1]
     if "^" in v:
         return
     v = v.replace("/","-")
@@ -29,14 +28,13 @@ if __name__ == "__main__":
         aws_access_key_id=os.environ.get('AWS_ID'),
         aws_secret_access_key=os.environ.get('AWS_KEY'))
     S3_BUCKET = os.environ.get('S3_BUCKET')
-    s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
+    # s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
     warnings.filterwarnings("ignore")
     n_threads = 20
     df = pd.read_csv('./tickers.csv')
-    tickerLen = len(df['Symbol'].index)
+    # tickerLen = len(df['Symbol'].index)
     ticker = df['Symbol'].iteritems()
     conn = sqlite3.connect('prices.db')
-
-    with ThreadPoolExecutor(max_workers=n_threads) as pool:
-        pool.map(download, ticker, [conn] * tickerLen)
+    for _, v in ticker:
+        download(v, conn)
     upload(s3_client, S3_BUCKET)
