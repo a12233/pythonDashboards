@@ -13,7 +13,7 @@ def download(v, conn):
     if "^" in v:
         return
     v = v.replace("/","-")
-    data = yf.Ticker(v).history(period="max")
+    data = yf.Ticker(v).history(period="day")
     data.to_sql(v, conn, schema=None, if_exists='replace', index=True, index_label=None, chunksize=None, dtype=None, method=None)
 
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     S3_BUCKET = os.environ.get('S3_BUCKET')
     s3_client.download_file(S3_BUCKET, 'prices.db', 'prices.db')
     warnings.filterwarnings("ignore")
-    n_threads = 5
+    n_threads = 20
     df = pd.read_csv('./tickers.csv')
     tickerLen = len(df['Symbol'].index)
     ticker = df['Symbol'].iteritems()
