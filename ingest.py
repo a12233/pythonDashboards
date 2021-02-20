@@ -12,7 +12,7 @@ def download(v, conn):
     if "^" in v:
         return
     v = v.replace("/","-")
-    data = yf.Ticker(v).history(period="day")
+    data = yf.Ticker(v).history(period="max")
     data.to_sql(v, conn, schema=None, if_exists='replace', index=True, index_label=None, chunksize=None, dtype=None, method=None)
 
 
